@@ -1,0 +1,1 @@
+{'name': 'launch_browser', 'description': "A tool that launches a web browser on the user's system.", 'parameters': {'type': 'object', 'properties': {'url': {'type': 'string', 'format': 'uri'}, 'browser': {'type': 'string', 'enum': ['chrome', 'firefox', 'safari', 'edge', 'opera']}}, 'required': ['url']}}

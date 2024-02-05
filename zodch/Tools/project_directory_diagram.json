@@ -1,0 +1,1 @@
+{'name': 'project_directory_diagram', 'description': "A tool to generate a visual diagram of the user's project directory, illustrating the folder structure and files.", 'parameters': {'type': 'object', 'properties': {'path': {'type': 'string'}, 'output_format': {'type': 'string', 'enum': ['png', 'jpg', 'svg']}}, 'required': ['path', 'output_format']}}

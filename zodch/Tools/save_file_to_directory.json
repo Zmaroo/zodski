@@ -1,0 +1,1 @@
+{'name': 'save_file_to_directory', 'description': 'Save files to the specified directory within the tool_maker directory.', 'parameters': {'type': 'object', 'properties': {'file_path': {'type': 'string'}, 'directory': {'type': 'string'}, 'filename': {'type': 'string'}}, 'required': ['file_path', 'directory', 'filename']}}

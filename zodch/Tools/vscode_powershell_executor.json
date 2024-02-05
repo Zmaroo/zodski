@@ -1,0 +1,1 @@
+{'name': 'vscode_powershell_executor', 'description': "Execute a PowerShell command to display the current user's directory structure.", 'parameters': {'type': 'object', 'properties': {'command': {'type': 'string'}}, 'required': ['command']}}
