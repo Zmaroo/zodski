@@ -37,6 +37,8 @@ function getCSRFToken() {
 }
 
 function renderNatalChart(zodiac_counts) {
+
+    // TODO: Insert the actual JavaScript code to render aspects here
     console.log("Rendering natal chart with data:", zodiac_counts);
 
     // Assume zodiac_counts is now an object and not an array
@@ -92,7 +94,15 @@ function renderNatalChart(zodiac_counts) {
         data: {
             labels: labels,
             datasets: datasets
-        },
+        ,
+        {
+            label: 'Aspects',
+            data: labels.map(label => zodiac_counts[label].aspects),
+            backgroundColor: 'rgba(255, 206, 86, 0.2)',
+            borderColor: 'rgba(255, 206, 86, 1)',
+            borderWidth: 1,
+            pointRadius: 3
+        }        },
         options: {
             scale: {
                 ticks: {

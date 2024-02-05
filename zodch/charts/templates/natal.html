@@ -42,5 +42,20 @@
     
     <!-- JavaScript files -->
     <script src="{% static 'dynChart.js' %}"></script>
+
+
+<!-- Add input fields for aspects below -->
+<form action="#" method="post">
+    {% csrf_token %}
+    <label for="conjunction">Conjunction:</label>
+    <input type="checkbox" id="conjunction" name="aspects" value="conjunction"><br>
+    <label for="opposition">Opposition:</label>
+    <input type="checkbox" id="opposition" name="aspects" value="opposition"><br>
+    <label for="trine">Trine:</label>
+    <input type="checkbox" id="trine" name="aspects" value="trine"><br>
+    <!-- Add more aspect checkboxes as needed -->
+    <input type="submit" value="Submit">
+</form>
+
 </body>
 </html>

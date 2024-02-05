@@ -4,7 +4,7 @@ from django.http import JsonResponse
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
-from .utils.natcalc import create_detailed_natal_chart
+from .utils.natcalc import NatalChartCalculator
 from .utils.natcalc import map_zodiac
 from django.shortcuts import render
 import json
