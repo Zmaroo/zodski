@@ -60,3 +60,15 @@ class NatalChartSeleniumTestCase(LiveServerTestCase):
 
         # Debugging: Keep the browser open
         input("Press Enter to quit the test...")  # Pauses here for manual intervention
+
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
+# This is a placeholder for the actual code that would autofill the form fields
+# Assuming 'driver' is a Selenium WebDriver instance and 'form_data' is a dictionary with form field names and values
+
+for field_name, value in form_data.items():
+    WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.NAME, field_name)))
+    driver.find_element_by_name(field_name).send_keys(value)
+

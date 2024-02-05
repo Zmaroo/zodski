@@ -18,7 +18,8 @@ class NatalChartCalculator:
 
     def __init__(self, ephe_path):
         self.ephe_path = ephe_path
-        swe.set_ephe_path(ephe_path)
+ephe_path = 'C:\\Users\\marle\\Zod\\ZODCH\\staticfiles\\sweph\\ephe'
+swe.set_ephe_path(ephe_path)
         self.logger = self.setup_logger()
 
     def setup_logger(self):

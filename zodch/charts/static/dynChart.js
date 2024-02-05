@@ -1,120 +1,57 @@
-document.addEventListener('DOMContentLoaded', function () {
-    document.getElementById('birth-info-form').addEventListener('submit', function (e) {
-        e.preventDefault(); // Prevents the default form submission
 
-        // Gather data from the form
-        const birthInfo = {
-            name: this.querySelector('[name="name"]').value,
-            birth_date: this.querySelector('[name="birth_date"]').value,
-            birth_time: this.querySelector('[name="birth_time"]').value,
-            location: this.querySelector('[name="location"]').value
-        };
-        console.log(birthInfo);
+// D3.js script to render the natal chart
 
-        // Perform the AJAX request
-        console.log("Making AJAX request");
-        fetch(apiUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': getCSRFToken()
-            },
-            body: JSON.stringify(birthInfo),
-        })
-        .then(response => response.json()) // Convert the response to a JavaScript object
-        .then(data => {
-            console.log("Received data:", data);
-            renderNatalChart(data); // Call renderNatalChart with the object
-        })
-        .catch(error => {
-            console.error('Error fetching chart data:', error);
-        });
-    });
+// Assume 'astroData' contains the positions of planets, houses, etc., from the Swiss Ephemeris
+const astroData = {...};
+
+// Select the HTML element where the chart will be rendered
+const svg = d3.select('#natal-chart').append('svg')
+    .attr('width', 600)
+    .attr('height', 600);
+
+// Add your D3.js code here to create an artistic natal chart using the data
+
+
+// Define the radius of the natal chart
+const radius = 300;
+
+// Draw the outer circle of the natal chart
+svg.append('circle')
+    .attr('cx', radius)
+    .attr('cy', radius)
+    .attr('r', radius)
+    .style('fill', 'none')
+    .style('stroke', 'black');
+
+// Add zodiac signs, houses, and planetary positions based on 'astroData'
+// This is a placeholder for the actual D3.js code that would render the astrological elements
+// ...
+
+
+// Example of rendering zodiac signs (this is a simplified representation)
+astroData.zodiacSigns.forEach(sign => {
+    svg.append('text')
+        .attr('x', function(d) { /* Calculate x based on sign.position */ })
+        .attr('y', function(d) { /* Calculate y based on sign.position */ })
+        .text(sign.name);
 });
 
-function getCSRFToken() {
-    return document.querySelector('[name=csrfmiddlewaretoken]').value;
-}
+// Example of rendering houses (this is a simplified representation)
+astroData.houses.forEach(house => {
+    svg.append('line')
+        .attr('x1', radius)
+        .attr('y1', radius)
+        .attr('x2', function(d) { /* Calculate x2 based on house.position */ })
+        .attr('y2', function(d) { /* Calculate y2 based on house.position */ })
+        .style('stroke', 'grey');
+});
 
-function renderNatalChart(zodiac_counts) {
-
-    // TODO: Insert the actual JavaScript code to render aspects here
-    console.log("Rendering natal chart with data:", zodiac_counts);
-
-    // Assume zodiac_counts is now an object and not an array
-    const labels = Object.keys(zodiac_counts);
-    const planetData = labels.map(label => zodiac_counts[label].planets);
-    const houseData = labels.map(label => zodiac_counts[label].houses);
-    const ascData = labels.map(label => zodiac_counts[label].ascendant);
-    const mcData = labels.map(label => zodiac_counts[label].midheaven);
-
-
-    // Create datasets for each aspect
-    const datasets = [
-        {
-            label: 'Planets',
-            data: planetData,
-            backgroundColor: 'rgba(255, 99, 132, 0.2)',
-            borderColor: 'rgba(255, 99, 132, 1)',
-            borderWidth: 1,
-            pointRadius: 3
-        },
-        {
-            label: 'Houses',
-            data: houseData,
-            backgroundColor: 'rgba(54, 162, 235, 0.2)',
-            borderColor: 'rgba(54, 162, 235, 1)',
-            borderWidth: 1,
-            pointRadius: 3
-        },
-        {
-            label: 'Ascendant',
-            data: ascData,
-            backgroundColor: 'rgba(75, 192, 192, 0.2)',
-            borderColor: 'rgba(75, 192, 192, 1)',
-            borderWidth: 1,
-            pointRadius: 3
-        },
-        {
-            label: 'Midheaven',
-            data: mcData,
-            backgroundColor: 'rgba(153, 102, 255, 0.2)',
-            borderColor: 'rgba(153, 102, 255, 1)',
-            borderWidth: 1,
-            pointRadius: 3
-        }
-    ];
-
-    // Get the context of the canvas element
-    const ctx = document.getElementById('natal-chart-container').getContext('2d');
-
-    // Create the radar chart
-    const chart = new Chart(ctx, {
-        type: 'radar',
-        data: {
-            labels: labels,
-            datasets: datasets
-        ,
-        {
-            label: 'Aspects',
-            data: labels.map(label => zodiac_counts[label].aspects),
-            backgroundColor: 'rgba(255, 206, 86, 0.2)',
-            borderColor: 'rgba(255, 206, 86, 1)',
-            borderWidth: 1,
-            pointRadius: 3
-        }        },
-        options: {
-            scale: {
-                ticks: {
-                    beginAtZero: true
-                }
-            },
-            elements: {
-                line: {
-                    tension: 0.2 // Smooths the line
-                }
-            }
-        }
-    });
-}
+// Example of rendering planetary positions (this is a simplified representation)
+astroData.planets.forEach(planet => {
+    svg.append('circle')
+        .attr('cx', function(d) { /* Calculate cx based on planet.position */ })
+        .attr('cy', function(d) { /* Calculate cy based on planet.position */ })
+        .attr('r', 5)
+        .style('fill', 'blue');
+});
 
