@@ -1,0 +1,46 @@
+
+
+{% load static %}
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Natal Chart</title>
+    <!-- Include your CSS file -->
+    <link rel="stylesheet" type="text/css" href="{% static 'styles.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+</head>
+
+<body>
+    <h1>Natal Chart</h1>
+    <form id="birth-info-form" method="post">
+        {% csrf_token %}
+        <label for="name">Full Name</label>
+        <input type="text" id="name" name="name" placeholder="Full Name" value="{{ default_name }}" required><br>
+    
+        <label for="birth_date">Birth Date</label>
+        <input type="date" id="birth_date" name="birth_date" value="{{ default_birth_date }}" required><br>
+    
+        <label for="birth_time">Birth Time</label>
+        <input type="time" id="birth_time" name="birth_time" value="{{ default_birth_time }}" required><br>
+    
+        <label for="location">Birth Location</label>
+        <input type="text" id="location" name="location" placeholder="Birth Location" value="{{ default_location }}" required><br>
+        
+        <button type="submit">Generate Chart</button>
+    </form>
+    
+    <canvas id="natal-chart-container"></canvas>
+
+    <script type="text/javascript">
+        var apiUrl = "{% url 'chart-data' %}";
+        
+    </script>
+    
+    <!-- JavaScript files -->
+    <script src="{% static 'dynChart.js' %}"></script>
+</body>
+</html>

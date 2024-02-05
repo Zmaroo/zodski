@@ -1,0 +1,195 @@
+import os
+import traceback
+import sys
+#from flatlib import aspects
+#rom flatlib import const
+#from flatlib.chart import Chart
+from geopy.exc import GeocoderTimedOut, GeocoderUnavailable
+#from flatlib.datetime import Datetime
+from geopy.geocoders import Nominatim
+#from flatlib.geopos import GeoPos
+import swisseph as swe
+import datetime
+import logging
+
+ephe_path = 'C:\\Users\\marle\\Zod\\ZODCH\\staticfiles\\sweph\\ephe'
+swe.set_ephe_path(ephe_path)
+#print(os.listdir(ephe_path))  # This should print out the contents of the ephe directory
+
+# Confirm the absolute path is set
+print("Swiss Ephemeris absolute path:", ephe_path)
+
+# Configure logging
+logger = logging.getLogger(__name__)
+logging.basicConfig(filename='debug.log', level=logging.DEBUG,
+                    format='%(asctime)s %(levelname)s %(name)s %(message)s')
+logger.setLevel(logging.DEBUG)
+
+
+def safe_geocode(location_name):
+    """Safely attempt to geocode a location name, returning None if unsuccessful."""
+    geolocator = Nominatim(user_agent="astro_app")
+    try:
+        location = geolocator.geocode(location_name)
+        if location:
+            return location.latitude, location.longitude
+    except (GeocoderTimedOut, GeocoderUnavailable) as e:
+        logger.debug(f"Geocoding error: {e}")
+    return None, None
+
+def parse_date(date_str):
+    """Parse a date string and return a datetime.date object or None if invalid."""
+    try:
+        return datetime.datetime.strptime(date_str, "%Y-%m-%d").date()
+    except ValueError:
+        return None
+
+import datetime
+
+def parse_time(time_str):
+    """Parse a time string with AM or PM and return a datetime.time object or None if invalid."""
+    # Try parsing time with AM/PM
+    for time_format in ("%I:%M %p", "%I:%M%p", "%H:%M"):
+        try:
+            return datetime.datetime.strptime(time_str, time_format).time()
+        except ValueError:
+            continue  # Try the next format if this one fails
+    return None  # All parsing attempts failed, return None
+
+    
+def decimal_to_geopos(decimal_degrees, is_longitude=False):
+    """Converts decimal degrees to a geopos string for Flatlib."""
+    degrees = int(decimal_degrees)
+    minutes = int(abs(decimal_degrees - degrees) * 60)
+    seconds = 0  # Flatlib does not require precise seconds
+    direction = 'E' if is_longitude and degrees >= 0 else 'W' if is_longitude else 'N' if degrees >= 0 else 'S'
+    return f"{abs(degrees)}:{minutes}:{seconds}{direction}"
+
+def calculate_planetary_positions(date, time):
+    dt = datetime.datetime.strptime(f"{date} {time}", "%Y-%m-%d %H:%M")
+    jd = swe.julday(dt.year, dt.month, dt.day, dt.hour + dt.minute/60 + dt.second/3600)
+    positions = {}
+    for planet in (swe.SUN, swe.MOON, swe.MARS, swe.MERCURY, swe.JUPITER, swe.VENUS, swe.SATURN, swe.URANUS, swe.NEPTUNE, swe.PLUTO):
+        pos = swe.calc_ut(jd, planet)
+        positions[planet] = pos[0]  # longitude
+    return positions
+
+def calculate_aspects(positions, orbs):
+    aspects = []
+    for i, planet1 in enumerate(positions):
+        for planet2 in list(positions)[i+1:]:
+            angle = abs(positions[planet1] - positions[planet2])
+            angle = min(angle, 360 - angle)  # Correct for angles greater than 180
+            for aspect, orb in orbs.items():
+                if abs(angle - aspect) <= orb:
+                    aspects.append((planet1, planet2, aspect))
+    return aspects
+
+
+def create_detailed_natal_chart(date_str, time_str, location_name): 
+    ephe_path = 'C:\\Users\\marle\\Zod\\ZODCH\\zodch\\sweph\\ephe'
+    swe.set_ephe_path(ephe_path)
+    # Validate and parse date and time
+    birth_date = parse_date(date_str)
+    birth_time = parse_time(time_str)
+    if not birth_date or not birth_time:
+        logger.debug("Invalid date or time format.")
+        return {}
+
+    # Attempt to geocode the location
+    latitude, longitude = safe_geocode(location_name)
+    if latitude is None or longitude is None:
+        print("Unable to geocode location.")
+        return {}   
+    try:
+        # Convert date and time to Julian Day
+        dt = datetime.datetime.combine(birth_date, birth_time)
+        jd = swe.julday(dt.year, dt.month, dt.day, dt.hour + dt.minute/60 + dt.second/3600)
+        # Set the flag for the house system, using Placidus as an example
+        flag = swe.FLG_SWIEPH | swe.FLG_SPEED
+
+        # Calculate the positions of the planets
+        positions = calculate_planetary_positions(date_str, time_str)
+
+        # Calculate the Ascendant and Midheaven
+        cusps, ascmc = swe.houses(jd, latitude, longitude, b'P')
+        ascendant = ascmc[0]
+        midheaven = ascmc[1]
+
+        # Get House cusps
+        houses = {f"House {i+1}": cusp for i, cusp in enumerate(cusps[1:])}
+
+        # Create Datetime and GeoPos objects using Flatlib
+        #birth_datetime_obj = birth_date, birth_time
+        #latitude_str = decimal_to_geopos(latitude)
+        #longitude_str = decimal_to_geopos(longitude, is_longitude=True)
+        #birth_location_obj = latitude_str, longitude_str
+        #chart = Chart(birth_datetime_obj, birth_location_obj)
+
+        # Get Aspects
+        # Retrieve the Sun and Moon 
+        #sun = chart.get(const.SUN)
+        #moon = chart.get(const.MOON)
+        #aspect = aspects.getAspect(sun, moon, const.MAJOR_ASPECTS)
+        #aspecttype = aspects.aspectType(sun, moon, const.MAJOR_ASPECTS)
+        # Prepare the aspect details
+        #aspect_details = {              
+        #    "planet1": aspect.active.id,
+        #    "planet2": aspect.passive.id,
+        #    "aspect": aspect.type,
+        #    "orb": aspect.orb,        
+        #}
+        
+                 
+
+        return positions, ascendant, midheaven, houses
+
+    except Exception as e:
+        # This will give you the name of the current function and the error message
+        error_message = f"An error occurred in {sys._getframe().f_code.co_name}: {e}"
+        # This will give you the full traceback as a string
+        full_traceback = traceback.format_exc()
+        print(error_message)
+        print("Full traceback:")
+        print(full_traceback)
+        return None, None, None, None
+    
+def map_zodiac(positions, houses, ascendant, midheaven):
+    zodiac_signs = ['Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo', 
+                    'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces']
+    zodiac_counts = {sign: {'planets': 0, 'houses': 0, 'ascendant': 0, 'midheaven': 0} for sign in zodiac_signs}
+
+    # Map planets to zodiac signs
+    for planet, position in positions.items():
+        longitude = position[0]
+        sign_index = int(longitude // 30)
+        zodiac_sign = zodiac_signs[sign_index]
+        zodiac_counts[zodiac_sign]['planets'] += 1
+
+    # Map house cusps to zodiac signs
+    for house, cusp in houses.items():
+        sign_index = int(cusp // 30)
+        zodiac_sign = zodiac_signs[sign_index]
+        zodiac_counts[zodiac_sign]['houses'] += 1
+
+    # Map Ascendant and Midheaven
+    asc_sign_index = int(ascendant // 30)
+    zodiac_counts[zodiac_signs[asc_sign_index]]['ascendant'] = 1
+
+    mc_sign_index = int(midheaven // 30)
+    zodiac_counts[zodiac_signs[mc_sign_index]]['midheaven'] = 1
+
+    return zodiac_counts
+    
+#if __name__ == "__main__":
+#    result = create_detailed_natal_chart("2000-01-02", "05:30", "Salt Lake City, UT")
+#    
+#    if result is not None and len(result) == 4:
+#        positions, ascendant, midheaven, houses = result
+#        print(f"Made it through natcalc")
+#        print(f"Ascendant: {ascendant}")
+#        print(f"Midheaven: {midheaven}")
+#        print(f"Houses: {houses}")
+#    else:
+#        print("An error occurred, and the natal chart could not be created.")
+
